@@ -3,32 +3,51 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Simulador Inteligente de Trafico La Paz-El Alto</title>
+  <title>Simulacion Inteligente de Trafico La Paz-El Alto</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
+<body class="theme-night">
   <main class="app-shell">
     <header class="topbar">
-      <section>
-        <p class="eyebrow">Centro de monitoreo vehicular</p>
-        <h1>Autopista La Paz-El Alto</h1>
+      <section class="brand-block">
+        <p class="eyebrow">Centro profesional de monitoreo vehicular</p>
+        <h1>Simulacion Inteligente del Trafico Vehicular</h1>
+        <p class="subtitle">Autopista La Paz-El Alto | Modelo con ecuaciones diferenciales</p>
       </section>
-      <section class="status-strip" aria-label="Estado general del trafico">
-        <div>
-          <span>Modelo</span>
+
+      <section class="status-strip" aria-label="Estado general">
+        <article>
+          <span>Modelo dinamico</span>
           <strong>dx/dt = v | dv/dt = a</strong>
-        </div>
-        <div>
-          <span>Control</span>
+        </article>
+        <article>
+          <span>Control vial</span>
           <strong id="controlModeLabel">Manual</strong>
-        </div>
-        <div>
+        </article>
+        <article>
           <span>Escenario</span>
           <strong id="scenarioLabel">Trafico normal</strong>
-        </div>
+        </article>
+        <article>
+          <span>Estado</span>
+          <strong id="runStateLabel">En ejecucion</strong>
+        </article>
       </section>
     </header>
+
+    <section class="command-bar" aria-label="Panel superior de control">
+      <button id="startBtn" class="command-button primary">▶ Iniciar</button>
+      <button id="pauseBtn" class="command-button">⏸ Pausar</button>
+      <button id="resetBtn" class="command-button">🔄 Reiniciar</button>
+      <button id="addVehicleBtn" class="command-button">🚗 Agregar vehiculos</button>
+      <button id="quickAccidentBtn" class="command-button danger">🚑 Simular accidente</button>
+      <button id="toggleSmartBtn" class="command-button">🚦 Activar modo inteligente</button>
+      <button id="nightBtn" class="command-button active">🌙 Modo noche</button>
+      <button id="dayBtn" class="command-button">☀ Modo dia</button>
+      <button id="rainBtn" class="command-button">🌧 Lluvia</button>
+      <button id="fogBtn" class="command-button">🌫 Niebla</button>
+    </section>
 
     <section class="dashboard">
       <aside class="panel controls-panel">
@@ -36,69 +55,70 @@
         <div class="button-grid">
           <button id="normalBtn" class="scenario-button active">Trafico normal</button>
           <button id="rushBtn" class="scenario-button">Hora pico</button>
-          <button id="accidentBtn" class="scenario-button">Accidente en autopista</button>
-          <button id="smartBtn" class="scenario-button">Modo inteligente</button>
+          <button id="heavyBtn" class="scenario-button">Trafico pesado</button>
+          <button id="accidentBtn" class="scenario-button">Accidente</button>
+          <button id="worksBtn" class="scenario-button">Obras</button>
+          <button id="stoppedBtn" class="scenario-button">Vehiculo detenido</button>
         </div>
 
         <h2>Parametros</h2>
         <label class="range-control">
           <span>Intensidad de entrada</span>
-          <input id="spawnRate" type="range" min="0.2" max="2.2" step="0.1" value="0.9" />
+          <input id="spawnRate" type="range" min="0.1" max="2.8" step="0.1" value="0.9" />
         </label>
         <label class="range-control">
           <span>Velocidad objetivo</span>
-          <input id="speedTarget" type="range" min="35" max="95" step="5" value="70" />
+          <input id="speedTarget" type="range" min="30" max="100" step="5" value="70" />
+        </label>
+        <label class="range-control">
+          <span>Zoom del mapa</span>
+          <input id="zoomControl" type="range" min="0.85" max="1.35" step="0.05" value="1" />
         </label>
 
         <div class="math-card">
-          <h3>Variables del trafico</h3>
-          <p><strong>ρ = N / L</strong> mide densidad vehicular.</p>
+          <h3>Modelo matematico</h3>
+          <p><strong>dx/dt = v</strong> actualiza la posicion.</p>
+          <p><strong>dv/dt = a</strong> actualiza velocidad y frenado.</p>
+          <p><strong>ρ = N / L</strong> calcula densidad vehicular.</p>
           <p><strong>q = ρ * v</strong> estima el flujo de la autopista.</p>
+        </div>
+
+        <div class="project-card">
+          <h3>Proyecto</h3>
+          <p>Simulacion Inteligente del Trafico Vehicular en la Autopista La Paz-El Alto</p>
+          <h3>Materia</h3>
+          <p>Ecuaciones Diferenciales</p>
         </div>
       </aside>
 
       <section class="simulation-stage">
         <div class="map-header">
-          <div>
-            <span class="map-dot green"></span>
-            La Paz -> El Alto
-          </div>
-          <div>
-            <span class="map-dot blue"></span>
-            El Alto -> La Paz
-          </div>
-          <div>
-            <span class="map-dot red"></span>
-            Zona critica
-          </div>
+          <div><span class="map-dot green"></span>La Paz -> El Alto</div>
+          <div><span class="map-dot blue"></span>El Alto -> La Paz</div>
+          <div><span class="map-dot red"></span>Zona critica</div>
+          <div><span class="map-dot amber"></span>Entradas y salidas</div>
         </div>
-        <canvas id="trafficCanvas" width="1260" height="760" aria-label="Vista superior de la autopista"></canvas>
+        <canvas id="trafficCanvas" width="1500" height="850" aria-label="Mapa animado de la autopista La Paz-El Alto"></canvas>
       </section>
 
       <aside class="panel stats-panel">
         <h2>Estadisticas en tiempo real</h2>
         <div class="metric-grid">
-          <article class="metric">
-            <span>Vehiculos</span>
-            <strong id="vehicleCount">0</strong>
-          </article>
-          <article class="metric">
-            <span>Velocidad promedio</span>
-            <strong id="averageSpeed">0 km/h</strong>
-          </article>
-          <article class="metric">
-            <span>Flujo q</span>
-            <strong id="flowValue">0 veh/km*h</strong>
-          </article>
-          <article class="metric">
-            <span>Densidad ρ</span>
-            <strong id="densityValue">0 veh/km</strong>
-          </article>
+          <article class="metric"><span>Vehiculos</span><strong id="vehicleCount">0</strong></article>
+          <article class="metric"><span>Velocidad promedio</span><strong id="averageSpeed">0 km/h</strong></article>
+          <article class="metric"><span>Flujo vehicular</span><strong id="flowValue">0 veh/km*h</strong></article>
+          <article class="metric"><span>Densidad</span><strong id="densityValue">0 veh/km</strong></article>
+          <article class="metric"><span>Tiempo promedio</span><strong id="waitTimeValue">0 s</strong></article>
+          <article class="metric"><span>Accidentes</span><strong id="accidentValue">0</strong></article>
+          <article class="metric"><span>Semaforos activos</span><strong id="activeLightsValue">0</strong></article>
+          <article class="metric"><span>Clima</span><strong id="weatherValue">Noche</strong></article>
         </div>
+
         <article id="congestionBadge" class="congestion low">
           <span>Nivel de congestion</span>
           <strong>Bajo</strong>
         </article>
+
         <div class="light-readout">
           <h3>Semaforos inteligentes</h3>
           <div id="lightStatus"></div>
@@ -107,14 +127,10 @@
     </section>
 
     <section class="charts-row">
-      <article class="chart-panel">
-        <h2>Velocidad vs tiempo</h2>
-        <canvas id="speedChart"></canvas>
-      </article>
-      <article class="chart-panel">
-        <h2>Vehiculos vs congestion</h2>
-        <canvas id="congestionChart"></canvas>
-      </article>
+      <article class="chart-panel"><h2>Velocidad vs tiempo</h2><canvas id="speedChart"></canvas></article>
+      <article class="chart-panel"><h2>Flujo vs tiempo</h2><canvas id="flowChart"></canvas></article>
+      <article class="chart-panel"><h2>Congestion vs tiempo</h2><canvas id="congestionChart"></canvas></article>
+      <article class="chart-panel"><h2>Cantidad de vehiculos</h2><canvas id="vehicleChart"></canvas></article>
     </section>
   </main>
 

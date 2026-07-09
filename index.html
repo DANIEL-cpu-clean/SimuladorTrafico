@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulador Inteligente de Trafico La Paz-El Alto</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <section>
+        <p class="eyebrow">Centro de monitoreo vehicular</p>
+        <h1>Autopista La Paz-El Alto</h1>
+      </section>
+      <section class="status-strip" aria-label="Estado general del trafico">
+        <div>
+          <span>Modelo</span>
+          <strong>dx/dt = v | dv/dt = a</strong>
+        </div>
+        <div>
+          <span>Control</span>
+          <strong id="controlModeLabel">Manual</strong>
+        </div>
+        <div>
+          <span>Escenario</span>
+          <strong id="scenarioLabel">Trafico normal</strong>
+        </div>
+      </section>
+    </header>
+
+    <section class="dashboard">
+      <aside class="panel controls-panel">
+        <h2>Escenarios</h2>
+        <div class="button-grid">
+          <button id="normalBtn" class="scenario-button active">Trafico normal</button>
+          <button id="rushBtn" class="scenario-button">Hora pico</button>
+          <button id="accidentBtn" class="scenario-button">Accidente en autopista</button>
+          <button id="smartBtn" class="scenario-button">Modo inteligente</button>
+        </div>
+
+        <h2>Parametros</h2>
+        <label class="range-control">
+          <span>Intensidad de entrada</span>
+          <input id="spawnRate" type="range" min="0.2" max="2.2" step="0.1" value="0.9" />
+        </label>
+        <label class="range-control">
+          <span>Velocidad objetivo</span>
+          <input id="speedTarget" type="range" min="35" max="95" step="5" value="70" />
+        </label>
+
+        <div class="math-card">
+          <h3>Variables del trafico</h3>
+          <p><strong>ρ = N / L</strong> mide densidad vehicular.</p>
+          <p><strong>q = ρ * v</strong> estima el flujo de la autopista.</p>
+        </div>
+      </aside>
+
+      <section class="simulation-stage">
+        <div class="map-header">
+          <div>
+            <span class="map-dot green"></span>
+            La Paz -> El Alto
+          </div>
+          <div>
+            <span class="map-dot blue"></span>
+            El Alto -> La Paz
+          </div>
+          <div>
+            <span class="map-dot red"></span>
+            Zona critica
+          </div>
+        </div>
+        <canvas id="trafficCanvas" width="1260" height="760" aria-label="Vista superior de la autopista"></canvas>
+      </section>
+
+      <aside class="panel stats-panel">
+        <h2>Estadisticas en tiempo real</h2>
+        <div class="metric-grid">
+          <article class="metric">
+            <span>Vehiculos</span>
+            <strong id="vehicleCount">0</strong>
+          </article>
+          <article class="metric">
+            <span>Velocidad promedio</span>
+            <strong id="averageSpeed">0 km/h</strong>
+          </article>
+          <article class="metric">
+            <span>Flujo q</span>
+            <strong id="flowValue">0 veh/km*h</strong>
+          </article>
+          <article class="metric">
+            <span>Densidad ρ</span>
+            <strong id="densityValue">0 veh/km</strong>
+          </article>
+        </div>
+        <article id="congestionBadge" class="congestion low">
+          <span>Nivel de congestion</span>
+          <strong>Bajo</strong>
+        </article>
+        <div class="light-readout">
+          <h3>Semaforos inteligentes</h3>
+          <div id="lightStatus"></div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="charts-row">
+      <article class="chart-panel">
+        <h2>Velocidad vs tiempo</h2>
+        <canvas id="speedChart"></canvas>
+      </article>
+      <article class="chart-panel">
+        <h2>Vehiculos vs congestion</h2>
+        <canvas id="congestionChart"></canvas>
+      </article>
+    </section>
+  </main>
+
+  <script src="differentialModel.js"></script>
+  <script src="trafficLight.js"></script>
+  <script src="vehicle.js"></script>
+  <script src="traffic.js"></script>
+  <script src="statistics.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

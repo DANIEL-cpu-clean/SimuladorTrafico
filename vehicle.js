@@ -9,9 +9,9 @@ class Vehicle {
     this.baseTargetSpeed = targetSpeed;
     this.color = color;
     this.acceleration = 0;
-    this.safeDistance = 28 + Math.random() * 18;
-    this.length = 24 + Math.random() * 12;
-    this.width = 13;
+    this.safeDistance = 46 + Math.random() * 26;
+    this.length = 18 + Math.random() * 8;
+    this.width = 10;
     this.type = Math.random() > 0.84 ? "bus" : "car";
     if (this.type === "bus") {
       this.length += 16;
@@ -58,3 +58,4 @@ function roundRect(ctx, x, y, width, height, radius) {
   ctx.arcTo(x, y, x + width, y, radius);
   ctx.closePath();
 }
+

@@ -10,6 +10,7 @@ class TrafficSimulation {
     ];
     this.pathLength = 1180;
     this.spawnRate = 0.9;
+    this.maxVehicles = 34;
     this.targetSpeedKmh = 70;
     this.smartMode = false;
     this.incidentMode = false;
@@ -37,27 +38,31 @@ class TrafficSimulation {
     this.smartMode = type === "smart";
     if (type === "normal") {
       this.scenario = "Trafico normal";
-      this.spawnRate = 0.85;
-      this.targetSpeedKmh = 70;
-      this.seedVehicles(30);
+      this.spawnRate = 0.28;
+      this.maxVehicles = 34;
+      this.targetSpeedKmh = 72;
+      this.seedVehicles(22);
     }
     if (type === "rush") {
       this.scenario = "Hora pico";
-      this.spawnRate = 1.75;
+      this.spawnRate = 0.95;
+      this.maxVehicles = 62;
       this.targetSpeedKmh = 56;
-      this.seedVehicles(66);
+      this.seedVehicles(48);
     }
     if (type === "accident") {
       this.scenario = "Accidente en autopista";
-      this.spawnRate = 1.25;
-      this.targetSpeedKmh = 54;
-      this.seedVehicles(54);
+      this.spawnRate = 0.75;
+      this.maxVehicles = 52;
+      this.targetSpeedKmh = 50;
+      this.seedVehicles(42);
     }
     if (type === "smart") {
       this.scenario = "Modo inteligente";
-      this.spawnRate = 1.35;
+      this.spawnRate = 0.65;
+      this.maxVehicles = 50;
       this.targetSpeedKmh = 66;
-      this.seedVehicles(54);
+      this.seedVehicles(40);
     }
   }
 
@@ -72,7 +77,7 @@ class TrafficSimulation {
     lanes.forEach(({ direction, lane }, laneIndex) => {
       const spacing = this.pathLength / vehiclesPerLane;
       for (let i = 0; i < vehiclesPerLane && this.vehicles.length < count; i++) {
-        const stagger = (laneIndex % 3) * 18 + Math.random() * 16;
+        const stagger = laneIndex * 54 + Math.random() * 18;
         const position = (i * spacing + stagger) % this.pathLength;
         this.addVehicle(position, lane, direction, true);
       }
@@ -80,11 +85,11 @@ class TrafficSimulation {
   }
 
   getSafeSpawnPosition(lane, direction, preferredPosition = -60) {
-    const minimumGap = 82;
+    const minimumGap = 118;
     for (let attempt = 0; attempt < 18; attempt++) {
       const candidate = attempt === 0
         ? preferredPosition
-        : (preferredPosition + attempt * 96 + Math.random() * 32) % this.pathLength;
+        : (preferredPosition + attempt * 128 + Math.random() * 42) % this.pathLength;
       const blocked = this.vehicles.some(vehicle => {
         if (vehicle.lane !== lane || vehicle.direction !== direction) return false;
         const rawDistance = Math.abs(vehicle.position - candidate);
@@ -118,7 +123,7 @@ class TrafficSimulation {
     this.spawnClock += dt * this.spawnRate;
     if (this.spawnClock > 1) {
       this.spawnClock = 0;
-      if (this.vehicles.length < 130) this.addVehicle(-70);
+      if (this.vehicles.length < this.maxVehicles) this.addVehicle(-70);
     }
 
     const stats = this.calculateStats();
@@ -227,7 +232,7 @@ class TrafficSimulation {
     ctx.strokeStyle = "rgba(255,255,255,0.58)";
     ctx.setLineDash([18, 18]);
     ctx.lineWidth = 2;
-    [-56, -28, 28, 56].forEach(offset => {
+    [-68, -34, 34, 68].forEach(offset => {
       this.drawBasePath(ctx, offset);
       ctx.stroke();
     });
@@ -319,8 +324,8 @@ class TrafficSimulation {
   drawVehicles(ctx) {
     this.vehicles.forEach(vehicle => {
       const laneOffset = vehicle.direction === 1
-        ? 22 + vehicle.lane * 28
-        : -22 - vehicle.lane * 28;
+        ? 27 + vehicle.lane * 34
+        : -27 - vehicle.lane * 34;
       const point = this.getPointOnPath(vehicle.position, laneOffset);
       const angle = this.getPathAngle(vehicle.position) + (vehicle.direction === 1 ? 0 : Math.PI);
       vehicle.draw(ctx, point, angle);
@@ -408,5 +413,8 @@ function bezierDerivative(p0, p1, p2, p3, t) {
     y: 3 * u ** 2 * (p1.y - p0.y) + 6 * u * t * (p2.y - p1.y) + 3 * t ** 2 * (p3.y - p2.y)
   };
 }
+
+
+
 
 

@@ -7,7 +7,7 @@ class DifferentialModel {
   calculateAcceleration(vehicle, context) {
     // Modelo microscópico: cada vehiculo ajusta su aceleracion segun velocidad deseada,
     // distancia de seguridad, semaforos y zona de incidente.
-    const desiredGap = vehicle.safeDistance + vehicle.speed * 0.78;
+    const desiredGap = vehicle.safeDistance + vehicle.length * 1.35 + vehicle.speed * 1.08;
     const leadGap = context.leadVehicle
       ? this.distanceAlongPath(vehicle, context.leadVehicle, context.pathLength)
       : Infinity;
@@ -16,7 +16,11 @@ class DifferentialModel {
 
     if (leadGap < desiredGap) {
       const pressure = (desiredGap - leadGap) / Math.max(desiredGap, 1);
-      acceleration -= this.maxBrake * pressure;
+      acceleration -= this.maxBrake * (0.9 + pressure * 1.6);
+    }
+
+    if (leadGap < vehicle.length + 34) {
+      acceleration -= this.maxBrake * 1.8;
     }
 
     if (context.redControlAhead && context.controlGap < desiredGap * 1.45) {
@@ -49,3 +53,4 @@ class DifferentialModel {
     return distance;
   }
 }
+

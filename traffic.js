@@ -39,45 +39,74 @@ class TrafficSimulation {
       this.scenario = "Trafico normal";
       this.spawnRate = 0.85;
       this.targetSpeedKmh = 70;
-      this.seedVehicles(40);
+      this.seedVehicles(30);
     }
     if (type === "rush") {
       this.scenario = "Hora pico";
       this.spawnRate = 1.75;
       this.targetSpeedKmh = 56;
-      this.seedVehicles(88);
+      this.seedVehicles(66);
     }
     if (type === "accident") {
       this.scenario = "Accidente en autopista";
       this.spawnRate = 1.25;
       this.targetSpeedKmh = 54;
-      this.seedVehicles(72);
+      this.seedVehicles(54);
     }
     if (type === "smart") {
       this.scenario = "Modo inteligente";
       this.spawnRate = 1.35;
       this.targetSpeedKmh = 66;
-      this.seedVehicles(68);
+      this.seedVehicles(54);
     }
   }
 
   seedVehicles(count) {
     this.vehicles = [];
-    for (let i = 0; i < count; i++) {
-      this.addVehicle(Math.random() * this.pathLength);
-    }
+    const lanes = [];
+    [-1, 1].forEach(direction => {
+      for (let lane = 0; lane < 3; lane++) lanes.push({ direction, lane });
+    });
+
+    const vehiclesPerLane = Math.ceil(count / lanes.length);
+    lanes.forEach(({ direction, lane }, laneIndex) => {
+      const spacing = this.pathLength / vehiclesPerLane;
+      for (let i = 0; i < vehiclesPerLane && this.vehicles.length < count; i++) {
+        const stagger = (laneIndex % 3) * 18 + Math.random() * 16;
+        const position = (i * spacing + stagger) % this.pathLength;
+        this.addVehicle(position, lane, direction, true);
+      }
+    });
   }
 
-  addVehicle(position = -60) {
-    const direction = Math.random() > 0.5 ? 1 : -1;
-    const lane = Math.floor(Math.random() * 3);
+  getSafeSpawnPosition(lane, direction, preferredPosition = -60) {
+    const minimumGap = 82;
+    for (let attempt = 0; attempt < 18; attempt++) {
+      const candidate = attempt === 0
+        ? preferredPosition
+        : (preferredPosition + attempt * 96 + Math.random() * 32) % this.pathLength;
+      const blocked = this.vehicles.some(vehicle => {
+        if (vehicle.lane !== lane || vehicle.direction !== direction) return false;
+        const rawDistance = Math.abs(vehicle.position - candidate);
+        const distance = Math.min(rawDistance, this.pathLength - rawDistance);
+        return distance < minimumGap;
+      });
+      if (!blocked) return candidate;
+    }
+    return (preferredPosition + Math.random() * this.pathLength) % this.pathLength;
+  }
+
+  addVehicle(position = -60, forcedLane = null, forcedDirection = null, skipGapCheck = false) {
+    const direction = forcedDirection ?? (Math.random() > 0.5 ? 1 : -1);
+    const lane = forcedLane ?? Math.floor(Math.random() * 3);
+    const safePosition = skipGapCheck ? position : this.getSafeSpawnPosition(lane, direction, position);
     const speed = this.kmhToModel(this.targetSpeedKmh * (0.66 + Math.random() * 0.28));
     const palette = ["#38d6e8", "#43d37b", "#f7c948", "#ff8f5d", "#6ea8ff", "#e7edf2"];
     this.vehicles.push(new Vehicle({
       id: this.vehicleId++,
       lane,
       direction,
-      position,
+      position: safePosition,
       speed,
       targetSpeed: this.kmhToModel(this.targetSpeedKmh * (0.88 + Math.random() * 0.18)),
       color: palette[Math.floor(Math.random() * palette.length)]
@@ -379,3 +408,5 @@ function bezierDerivative(p0, p1, p2, p3, t) {
     y: 3 * u ** 2 * (p1.y - p0.y) + 6 * u * t * (p2.y - p1.y) + 3 * t ** 2 * (p3.y - p2.y)
   };
 }
+
+
